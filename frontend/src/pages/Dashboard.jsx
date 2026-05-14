@@ -11,6 +11,13 @@ import {
 import FilterBar from '../components/filters/FilterBar';
 
 import StatsSection from '../components/ui/StatsSection';
+import IntensityBarChart from '../components/charts/IntensityBarChart';
+import TopicPieChart from '../components/charts/TopicPieChart';
+import RegionChart from '../components/charts/RegionChart';
+import YearTrendChart from '../components/charts/YearTrendChart';
+import PestleChart from '../components/charts/PestleChart';
+import BubbleChart from '../components/charts/BubbleChart';
+import InsightsTable from '../components/ui/InsightsTable';
 
 
 const Dashboard = () => {
@@ -31,13 +38,18 @@ const Dashboard = () => {
 
     // Selected Filters
     const [selectedFilters, setSelectedFilters] = useState({
+        end_year: '',
+        start_year: '',
         sector: '',
-        topic: '',
         region: '',
-        country: '',
         pestle: '',
         source: '',
-        end_year: '',
+        country: '',
+        city: '',
+        topic: '',
+        intensity: '',
+        likelihood: '',
+        relevance: '',
     });
 
 
@@ -158,7 +170,7 @@ const Dashboard = () => {
             <div>
 
                 {/* Heading */}
-                <h2 className="text-3xl font-bold mb-4">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">
                     Dashboard Overview
                 </h2>
 
@@ -166,18 +178,15 @@ const Dashboard = () => {
                     Interactive analytics and visualization dashboard.
                 </p>
 
+                {/* Stats */}
+                <StatsSection stats={stats} />
 
-                {/* Filters */}
+{/* Filters */}
                 <FilterBar
                     filters={filters}
                     selectedFilters={selectedFilters}
                     onFilterChange={handleFilterChange}
                 />
-
-
-                {/* Stats */}
-                <StatsSection stats={stats} />
-
 
                 {/* TEMP DATA COUNT */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
@@ -191,6 +200,28 @@ const Dashboard = () => {
                     </p>
 
                 </div>
+
+<div className="grid grid-cols-1 2xl:grid-cols-2 gap-6 mt-8">
+
+    <IntensityBarChart data={dashboardData} />
+
+    <TopicPieChart data={dashboardData} />
+
+    <RegionChart data={dashboardData} />
+
+    <YearTrendChart data={dashboardData} />
+
+    <PestleChart data={dashboardData} />
+
+</div>
+
+<div className="mt-8">
+
+    <BubbleChart data={dashboardData} />
+
+</div>
+
+<InsightsTable data={dashboardData} />
 
             </div>
 

@@ -6,7 +6,7 @@ const StatCard = ({ title, value }) => {
                 {title}
             </p>
 
-            <h3 className="text-3xl font-bold text-white">
+            <h3 className="text-2xl md:text-3xl font-bold text-white">
                 {value}
             </h3>
 

@@ -78,6 +78,8 @@ const getFilterOptions = async (req, res) => {
             countries,
             cities,
             endYears,
+            startYears,
+            intensityRanges,
         ] = await Promise.all([
             DataModel.distinct('sector'),
             DataModel.distinct('topic'),
@@ -87,6 +89,8 @@ const getFilterOptions = async (req, res) => {
             DataModel.distinct('country'),
             DataModel.distinct('city'),
             DataModel.distinct('end_year'),
+            DataModel.distinct('start_year'),
+            DataModel.distinct('intensity'),
         ]);
 
         res.status(200).json({
@@ -100,6 +104,12 @@ const getFilterOptions = async (req, res) => {
                 countries: countries.filter(Boolean),
                 cities: cities.filter(Boolean),
                 endYears: endYears
+                    .filter(Boolean)
+                    .sort((a, b) => a - b),
+                startYears: startYears
+                    .filter(Boolean)
+                    .sort((a, b) => a - b),
+                intensityRanges: intensityRanges
                     .filter(Boolean)
                     .sort((a, b) => a - b),
             },
