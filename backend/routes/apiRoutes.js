@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardData } = require('../controllers/dataController');
+const { getDashboardData, getFilterOptions, getDashboardStats } = require('../controllers/dataController');
 
-// The route is now clean and simply points to the controller function
+
 router.get('/data', getDashboardData);
+router.get('/filters', getFilterOptions);
+router.get('/stats', getDashboardStats);
 
 module.exports = router;

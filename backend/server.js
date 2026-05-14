@@ -17,7 +17,7 @@ const apiRoutes = require('./routes/apiRoutes');
 
 // Base test route
 app.get('/', (req, res) => {
-  res.send('Blackcoffer Dashboard API is running');
+  res.send('Dashboard API is running');
 });
 
 // Use Routes
