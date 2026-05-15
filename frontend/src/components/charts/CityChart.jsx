@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 import {
-    Activity,
-    Briefcase,
+    Building2,
+    MapPin,
     Sparkles,
     TrendingUp,
+    SearchX,
+    Info
 } from 'lucide-react';
 
-const PestleChart = ({ data }) => {
+const CityChart = ({ data }) => {
     const svgRef = useRef();
 
     // =====================================
@@ -16,46 +18,48 @@ const PestleChart = ({ data }) => {
     const chartData = useMemo(() => {
         if (!data?.length) return [];
 
-        const pestleCounts = {};
+        const cityCounts = {};
 
         data.forEach((item) => {
-            if (!item.pestle) return;
-            pestleCounts[item.pestle] = (pestleCounts[item.pestle] || 0) + 1;
+            // Robust check for missing or empty city strings
+            if (!item.city || item.city.trim() === '') return;
+            cityCounts[item.city] = (cityCounts[item.city] || 0) + 1;
         });
 
-        return Object.entries(pestleCounts)
-            .map(([pestle, count]) => ({
-                pestle,
+        return Object.entries(cityCounts)
+            .map(([city, count]) => ({
+                city,
                 count,
             }))
             .sort((a, b) => b.count - a.count)
-            .slice(0, 8); // Top 8 PESTLE factors
+            .slice(0, 8); // Top 8 Cities
     }, [data]);
 
     // =====================================
     // TOTAL
     // =====================================
-    const totalCount = useMemo(() => {
+    const totalRecords = useMemo(() => {
         return chartData.reduce((sum, item) => sum + item.count, 0);
     }, [chartData]);
 
-    const topSegment = chartData?.[0]?.pestle || '-';
+    const topCity = chartData?.[0]?.city || '-';
 
     // =====================================
     // CHART
     // =====================================
     useEffect(() => {
+        // If no data, do not attempt to render D3
         if (!chartData.length) return;
 
         d3.select(svgRef.current).selectAll('*').remove();
-        d3.selectAll('.pestle-tooltip').remove();
+        d3.selectAll('.city-tooltip').remove();
 
         // =====================================
-        // DIMENSIONS (Significantly reduced height)
+        // DIMENSIONS
         // =====================================
-        const width = 950;
-        const height = 360; // Reduced from 520 to make it ultra-sleek and fit one screen
-        const margin = { top: 20, right: 40, bottom: 40, left: 160 }; // Left margin for labels
+        const width = 920;
+        const height = 450; // Reduced for compact layout
+        const margin = { top: 20, right: 40, bottom: 40, left: 160 }; // Left margin for city names
 
         // =====================================
         // SVG
@@ -67,11 +71,11 @@ const PestleChart = ({ data }) => {
             .style('height', 'auto');
 
         // =====================================
-        // SCALES (Horizontal Bar Chart)
+        // SCALES
         // =====================================
         const yScale = d3
             .scaleBand()
-            .domain(chartData.map((d) => d.pestle))
+            .domain(chartData.map((d) => d.city))
             .range([margin.top, height - margin.bottom])
             .padding(0.26);
 
@@ -104,7 +108,7 @@ const PestleChart = ({ data }) => {
         // =====================================
         // AXES
         // =====================================
-        // Y Axis (Categories)
+        // Y Axis (Cities)
         svg.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(d3.axisLeft(yScale).tickSize(0))
@@ -130,7 +134,7 @@ const PestleChart = ({ data }) => {
         const tooltip = d3
             .select('body')
             .append('div')
-            .attr('class', 'pestle-tooltip')
+            .attr('class', 'city-tooltip')
             .style('position', 'absolute')
             .style('opacity', 0)
             .style('pointer-events', 'none')
@@ -147,8 +151,14 @@ const PestleChart = ({ data }) => {
         // COLORS
         // =====================================
         const colors = [
-            '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b',
-            '#ef4444', '#ec4899', '#3b82f6', '#84cc16',
+            '#ec4899', // Pink 500
+            '#0ea5e9', // Sky 500
+            '#8b5cf6', // Violet 500
+            '#10b981', // Emerald 500
+            '#f59e0b', // Amber 500
+            '#ef4444', // Red 500
+            '#3b82f6', // Blue 500
+            '#84cc16', // Lime 500
         ];
 
         // =====================================
@@ -161,10 +171,10 @@ const PestleChart = ({ data }) => {
             .append('rect')
             .attr('class', 'bar')
             .attr('x', margin.left)
-            .attr('y', (d) => yScale(d.pestle))
+            .attr('y', (d) => yScale(d.city))
             .attr('height', yScale.bandwidth())
             .attr('width', 0) // Start width at 0 for animation
-            .attr('rx', 6)
+            .attr('rx', 8)
             .attr('fill', (d, i) => colors[i % colors.length])
             .style('cursor', 'pointer')
             .style('opacity', 0.85);
@@ -178,14 +188,14 @@ const PestleChart = ({ data }) => {
             .attr('width', (d) => xScale(d.count) - margin.left);
 
         // =====================================
-        // VALUE LABELS (Inside/End of Bars)
+        // VALUE LABELS
         // =====================================
         svg.selectAll('.value-label')
             .data(chartData)
             .enter()
             .append('text')
             .attr('x', (d) => xScale(d.count) + 12)
-            .attr('y', (d) => yScale(d.pestle) + yScale.bandwidth() / 2)
+            .attr('y', (d) => yScale(d.city) + yScale.bandwidth() / 2)
             .attr('dy', '0.35em')
             .style('fill', 'var(--foreground)')
             .style('font-size', '12px')
@@ -208,13 +218,13 @@ const PestleChart = ({ data }) => {
                 .attr('stroke', 'var(--foreground)')
                 .attr('stroke-width', 2);
 
-            const percentage = ((d.count / totalCount) * 100).toFixed(1);
+            const percentage = ((d.count / totalRecords) * 100).toFixed(1);
 
             tooltip
                 .style('opacity', 1)
                 .html(`
                     <div style="font-weight:700; font-size:13px; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px;">
-                        ${d.pestle}
+                        ${d.city}
                     </div>
                     <div style="display:grid; grid-template-columns:auto auto; gap:6px 16px; color:var(--foreground-muted);">
                         <span>Records</span>
@@ -240,70 +250,92 @@ const PestleChart = ({ data }) => {
         });
 
         return () => {
-            d3.selectAll('.pestle-tooltip').remove();
+            d3.selectAll('.city-tooltip').remove();
         };
 
-    }, [chartData, totalCount]);
+    }, [chartData, totalRecords]);
 
     return (
-        <div className="relative overflow-hidden rounded-3xl border app-border bg-surface p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border app-border bg-surface p-6 shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col h-full">
             
             {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-violet-500 dark:text-violet-400">
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-pink-500/20 bg-pink-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-pink-600 dark:text-pink-400">
                         <Sparkles size={14} />
-                        Strategic Factors
+                        Urban Analytics
                     </div>
 
                     <h2 className="text-2xl font-bold app-text">
-                        PESTLE Analysis
+                        City Distribution
                     </h2>
 
                     <p className="mt-2 max-w-xl text-sm leading-6 app-text-muted">
-                        Distribution of macro-environmental categories across the dataset.
+                        Top cities contributing the highest number of records in the dataset.
                     </p>
                 </div>
 
-                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-500">
-                    <Activity size={16} />
-                    Generate Report
+                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-pink-500/30 hover:bg-pink-500/10 hover:text-pink-500">
+                    <TrendingUp size={16} />
+                    City Insights
                 </button>
             </div>
 
-            {/* COMPACT STATS BOXES */}
-            <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-                    <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Categories</span>
-                    <span className="text-lg font-bold app-text">{chartData.length}</span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-                    <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Total Records</span>
-                    <span className="text-lg font-bold text-cyan-500">{totalCount}</span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-                    <div className="flex items-center gap-2">
-                        <Briefcase size={14} className="text-violet-500" />
-                        <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Top Segment</span>
+            {/* CONDITIONAL RENDER: Empty State vs Active Chart */}
+            {chartData.length === 0 ? (
+                // THE EMPTY STATE
+                <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-dashed app-border bg-surface-strong/20 p-10 min-h-[300px]">
+                    <div className="text-center animate-in fade-in zoom-in duration-500">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-strong/50">
+                            <SearchX className="h-8 w-8 text-foreground-muted opacity-50" />
+                        </div>
+                        <h3 className="text-lg font-semibold app-text">No City Data Available</h3>
+                        <p className="mt-2 max-w-[220px] mx-auto text-xs leading-5 app-text-muted">
+                            The current dataset does not contain specific city-level variables to visualize.
+                        </p>
+                        
+                        <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-surface-strong px-3 py-1.5 text-[10px] font-medium app-text-muted border app-border">
+                            <Info size={12} />
+                            Requirement Handled Gracefully
+                        </div>
                     </div>
-                    <span className="text-lg font-bold text-violet-500">
-                        {topSegment.length > 15 ? `${topSegment.slice(0, 15)}...` : topSegment}
-                    </span>
                 </div>
-            </div>
+            ) : (
+                // THE ACTIVE CHART
+                <>
+                    {/* COMPACT STATS BOXES */}
+                    <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                            <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Cities</span>
+                            <span className="text-lg font-bold app-text">{chartData.length}</span>
+                        </div>
 
-            {/* CHART */}
-            <div className="rounded-3xl border app-border bg-surface-strong/20 p-4">
-                <div className="w-full">
-                    {/* Responsive scaling without overflow bugs */}
-                    <svg ref={svgRef} className="w-full h-auto block" />
-                </div>
-            </div>
+                        <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                            <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Total Records</span>
+                            <span className="text-lg font-bold text-cyan-500">{totalRecords}</span>
+                        </div>
 
+                        <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                            <div className="flex items-center gap-2">
+                                <Building2 size={14} className="text-pink-500" />
+                                <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Leading</span>
+                            </div>
+                            <span className="text-lg font-bold text-pink-500">
+                                {topCity.length > 12 ? `${topCity.slice(0, 12)}...` : topCity}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* CHART */}
+                    <div className="rounded-3xl border app-border bg-surface-strong/20 p-4">
+                        <div className="w-full">
+                            <svg ref={svgRef} className="w-full h-auto block" />
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };
 
-export default PestleChart;
+export default CityChart;

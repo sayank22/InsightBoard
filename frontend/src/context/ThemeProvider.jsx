@@ -1,12 +1,8 @@
 import {
-    createContext,
-    useContext,
     useEffect,
     useState,
 } from 'react';
-
-
-const ThemeContext = createContext();
+import { ThemeContext } from './ThemeContext';
 
 const getSystemTheme = () => {
     if (typeof window === 'undefined') {
@@ -68,17 +64,4 @@ export const ThemeProvider = ({ children }) => {
             {children}
         </ThemeContext.Provider>
     );
-};
-
-
-export const useTheme = () => {
-    const context = useContext(ThemeContext);
-
-    if (!context) {
-        throw new Error(
-            'useTheme must be used within a ThemeProvider'
-        );
-    }
-
-    return context;
 };

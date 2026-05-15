@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 import {
-    Activity,
-    Briefcase,
+    Globe,
+    MapPinned,
     Sparkles,
     TrendingUp,
 } from 'lucide-react';
 
-const PestleChart = ({ data }) => {
+const CountryChart = ({ data }) => {
     const svgRef = useRef();
 
     // =====================================
@@ -16,30 +16,30 @@ const PestleChart = ({ data }) => {
     const chartData = useMemo(() => {
         if (!data?.length) return [];
 
-        const pestleCounts = {};
+        const countryCounts = {};
 
         data.forEach((item) => {
-            if (!item.pestle) return;
-            pestleCounts[item.pestle] = (pestleCounts[item.pestle] || 0) + 1;
+            if (!item.country) return;
+            countryCounts[item.country] = (countryCounts[item.country] || 0) + 1;
         });
 
-        return Object.entries(pestleCounts)
-            .map(([pestle, count]) => ({
-                pestle,
+        return Object.entries(countryCounts)
+            .map(([country, count]) => ({
+                country,
                 count,
             }))
             .sort((a, b) => b.count - a.count)
-            .slice(0, 8); // Top 8 PESTLE factors
+            .slice(0, 8); // Top 8 Countries
     }, [data]);
 
     // =====================================
     // TOTAL
     // =====================================
-    const totalCount = useMemo(() => {
+    const totalRecords = useMemo(() => {
         return chartData.reduce((sum, item) => sum + item.count, 0);
     }, [chartData]);
 
-    const topSegment = chartData?.[0]?.pestle || '-';
+    const topCountry = chartData?.[0]?.country || '-';
 
     // =====================================
     // CHART
@@ -48,14 +48,14 @@ const PestleChart = ({ data }) => {
         if (!chartData.length) return;
 
         d3.select(svgRef.current).selectAll('*').remove();
-        d3.selectAll('.pestle-tooltip').remove();
+        d3.selectAll('.country-tooltip').remove();
 
         // =====================================
-        // DIMENSIONS (Significantly reduced height)
+        // DIMENSIONS
         // =====================================
-        const width = 950;
-        const height = 360; // Reduced from 520 to make it ultra-sleek and fit one screen
-        const margin = { top: 20, right: 40, bottom: 40, left: 160 }; // Left margin for labels
+        const width = 920;
+        const height = 450; // Reduced for compact layout
+        const margin = { top: 20, right: 40, bottom: 40, left: 180 }; // Left margin for long country names
 
         // =====================================
         // SVG
@@ -71,7 +71,7 @@ const PestleChart = ({ data }) => {
         // =====================================
         const yScale = d3
             .scaleBand()
-            .domain(chartData.map((d) => d.pestle))
+            .domain(chartData.map((d) => d.country))
             .range([margin.top, height - margin.bottom])
             .padding(0.26);
 
@@ -104,7 +104,7 @@ const PestleChart = ({ data }) => {
         // =====================================
         // AXES
         // =====================================
-        // Y Axis (Categories)
+        // Y Axis (Countries)
         svg.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(d3.axisLeft(yScale).tickSize(0))
@@ -130,7 +130,7 @@ const PestleChart = ({ data }) => {
         const tooltip = d3
             .select('body')
             .append('div')
-            .attr('class', 'pestle-tooltip')
+            .attr('class', 'country-tooltip')
             .style('position', 'absolute')
             .style('opacity', 0)
             .style('pointer-events', 'none')
@@ -147,8 +147,14 @@ const PestleChart = ({ data }) => {
         // COLORS
         // =====================================
         const colors = [
-            '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b',
-            '#ef4444', '#ec4899', '#3b82f6', '#84cc16',
+            '#0ea5e9', // Sky 500
+            '#8b5cf6', // Violet 500
+            '#10b981', // Emerald 500
+            '#f59e0b', // Amber 500
+            '#ef4444', // Red 500
+            '#ec4899', // Pink 500
+            '#3b82f6', // Blue 500
+            '#84cc16', // Lime 500
         ];
 
         // =====================================
@@ -161,10 +167,10 @@ const PestleChart = ({ data }) => {
             .append('rect')
             .attr('class', 'bar')
             .attr('x', margin.left)
-            .attr('y', (d) => yScale(d.pestle))
+            .attr('y', (d) => yScale(d.country))
             .attr('height', yScale.bandwidth())
             .attr('width', 0) // Start width at 0 for animation
-            .attr('rx', 6)
+            .attr('rx', 8)
             .attr('fill', (d, i) => colors[i % colors.length])
             .style('cursor', 'pointer')
             .style('opacity', 0.85);
@@ -185,7 +191,7 @@ const PestleChart = ({ data }) => {
             .enter()
             .append('text')
             .attr('x', (d) => xScale(d.count) + 12)
-            .attr('y', (d) => yScale(d.pestle) + yScale.bandwidth() / 2)
+            .attr('y', (d) => yScale(d.country) + yScale.bandwidth() / 2)
             .attr('dy', '0.35em')
             .style('fill', 'var(--foreground)')
             .style('font-size', '12px')
@@ -208,13 +214,13 @@ const PestleChart = ({ data }) => {
                 .attr('stroke', 'var(--foreground)')
                 .attr('stroke-width', 2);
 
-            const percentage = ((d.count / totalCount) * 100).toFixed(1);
+            const percentage = ((d.count / totalRecords) * 100).toFixed(1);
 
             tooltip
                 .style('opacity', 1)
                 .html(`
                     <div style="font-weight:700; font-size:13px; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px;">
-                        ${d.pestle}
+                        ${d.country}
                     </div>
                     <div style="display:grid; grid-template-columns:auto auto; gap:6px 16px; color:var(--foreground-muted);">
                         <span>Records</span>
@@ -240,10 +246,10 @@ const PestleChart = ({ data }) => {
         });
 
         return () => {
-            d3.selectAll('.pestle-tooltip').remove();
+            d3.selectAll('.country-tooltip').remove();
         };
 
-    }, [chartData, totalCount]);
+    }, [chartData, totalRecords]);
 
     return (
         <div className="relative overflow-hidden rounded-3xl border app-border bg-surface p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
@@ -251,45 +257,45 @@ const PestleChart = ({ data }) => {
             {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-violet-500 dark:text-violet-400">
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
                         <Sparkles size={14} />
-                        Strategic Factors
+                        Global Analytics
                     </div>
 
                     <h2 className="text-2xl font-bold app-text">
-                        PESTLE Analysis
+                        Country Distribution
                     </h2>
 
                     <p className="mt-2 max-w-xl text-sm leading-6 app-text-muted">
-                        Distribution of macro-environmental categories across the dataset.
+                        Top countries contributing the highest number of records in the dataset.
                     </p>
                 </div>
 
-                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-500">
-                    <Activity size={16} />
-                    Generate Report
+                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-500">
+                    <TrendingUp size={16} />
+                    Global Insights
                 </button>
             </div>
 
             {/* COMPACT STATS BOXES */}
             <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-                    <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Categories</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Countries</span>
                     <span className="text-lg font-bold app-text">{chartData.length}</span>
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
                     <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Total Records</span>
-                    <span className="text-lg font-bold text-cyan-500">{totalCount}</span>
+                    <span className="text-lg font-bold text-sky-500">{totalRecords}</span>
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
                     <div className="flex items-center gap-2">
-                        <Briefcase size={14} className="text-violet-500" />
-                        <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Top Segment</span>
+                        <MapPinned size={14} className="text-emerald-500" />
+                        <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Leading</span>
                     </div>
-                    <span className="text-lg font-bold text-violet-500">
-                        {topSegment.length > 15 ? `${topSegment.slice(0, 15)}...` : topSegment}
+                    <span className="text-lg font-bold text-emerald-500">
+                        {topCountry.length > 12 ? `${topCountry.slice(0, 12)}...` : topCountry}
                     </span>
                 </div>
             </div>
@@ -297,13 +303,12 @@ const PestleChart = ({ data }) => {
             {/* CHART */}
             <div className="rounded-3xl border app-border bg-surface-strong/20 p-4">
                 <div className="w-full">
-                    {/* Responsive scaling without overflow bugs */}
+                    {/* SVG scales naturally without overflow wrapping */}
                     <svg ref={svgRef} className="w-full h-auto block" />
                 </div>
             </div>
-
         </div>
     );
 };
 
-export default PestleChart;
+export default CountryChart;

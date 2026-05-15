@@ -1,44 +1,190 @@
 @import "tailwindcss";
 
+/* ==========================================
+   TAILWIND V4 THEME INTEGRATION
+   This allows you to use standard classes 
+   like 'bg-surface' or 'text-foreground'
+========================================== */
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-hover: var(--hover);
+}
+
+/* ==========================================
+   THEME VARIABLES (DARK MODE - DEFAULT)
+========================================== */
 :root {
   color-scheme: dark;
-  --background: #0f172a;
+
+  /* Backgrounds */
+  --background: #020617; /* Very dark slate */
+  --surface: #0f172a;    /* Dark slate blue for cards */
+  --surface-strong: #1e293b; /* Slate-800 for popovers/tooltips */
+
+  /* Text */
   --foreground: #ffffff;
-  --surface: #0f172a;
-  --surface-strong: #111827;
-  --border: #1f2937;
-  --muted: #94a3b8;
+  --foreground-muted: #94a3b8;
+
+  /* Borders */
+  --border: #1e293b;
+
+  /* Hover */
+  --hover: #1e293b;
+
+  /* Primary */
+  --primary: #3b82f6;
+
+  /* Shadow */
+  --shadow: rgba(0, 0, 0, 0.35);
 }
 
+/* ==========================================
+   LIGHT MODE
+========================================== */
 .light {
   color-scheme: light;
-  --background: #f8fafc;
+
+  /* Backgrounds */
+  --background: #f8fafc; /* Very light gray */
+  --surface: #ffffff;    /* Pure white for cards */
+  --surface-strong: #f1f5f9; /* Slate-100 for popovers/tooltips */
+
+  /* Text */
   --foreground: #0f172a;
-  --surface: #ffffff;
-  --surface-strong: #f8fafc;
+  --foreground-muted: #64748b;
+
+  /* Borders */
   --border: #cbd5e1;
-  --muted: #64748b;
+
+  /* Hover */
+  --hover: #e2e8f0;
+
+  /* Primary */
+  --primary: #2563eb;
+
+  /* Shadow */
+  --shadow: rgba(15, 23, 42, 0.08);
 }
 
+/* ==========================================
+   DARK MODE (EXPLICIT CLASS)
+========================================== */
 .dark {
   color-scheme: dark;
-  --background: #0f172a;
-  --foreground: #ffffff;
+
+  /* Backgrounds */
+  --background: #020617;
   --surface: #0f172a;
-  --surface-strong: #111827;
-  --border: #1f2937;
-  --muted: #94a3b8;
+  --surface-strong: #1e293b;
+
+  /* Text */
+  --foreground: #ffffff;
+  --foreground-muted: #94a3b8;
+
+  /* Borders */
+  --border: #1e293b;
+
+  /* Hover */
+  --hover: #1e293b;
+
+  /* Primary */
+  --primary: #3b82f6;
+
+  /* Shadow */
+  --shadow: rgba(0, 0, 0, 0.35);
 }
 
-body {
+/* ==========================================
+   GLOBAL RESET
+========================================== */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: Arial, sans-serif;
-  transition: background-color 200ms ease, color 200ms ease;
 }
 
-body, button, input, select, textarea {
+/* ==========================================
+   BODY
+========================================== */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+
+  font-family: Inter, Arial, Helvetica, sans-serif;
+
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================
+   FORM ELEMENTS
+========================================== */
+button,
+input,
+select,
+textarea {
   color: inherit;
+  font: inherit;
+}
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* ==========================================
+   REUSABLE UTILITY CLASSES
+========================================== */
+.app-bg { background-color: var(--background); }
+.app-surface { background-color: var(--surface); }
+.app-surface-strong { background-color: var(--surface-strong); }
+.app-text { color: var(--foreground); }
+.app-text-muted { color: var(--foreground-muted); }
+.app-border { border-color: var(--border); }
+.app-hover:hover { background-color: var(--hover); }
+.app-primary { color: var(--primary); }
+.app-primary-bg { background-color: var(--primary); }
+.app-shadow { box-shadow: 0 10px 25px var(--shadow); }
+
+/* ==========================================
+   TRANSITIONS
+========================================== */
+.transition-theme {
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease;
 }
