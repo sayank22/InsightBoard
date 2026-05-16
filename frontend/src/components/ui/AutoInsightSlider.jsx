@@ -177,7 +177,7 @@ const AutoInsightSlider = ({ data = [] }) => {
         <div 
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className={`relative overflow-hidden rounded-3xl border app-border bg-[var(--surface)] p-6 shadow-xl transition-all duration-500 ease-in-out ${cardStyle.glow} ${cardStyle.borderHover}`}
+            className={`relative overflow-hidden rounded-3xl border app-border bg-cyan-300 p-6 shadow-xl transition-all duration-500 ease-in-out ${cardStyle.glow} ${cardStyle.borderHover}`}
         >
             {/* RICH SUBTLE EMISSION BACKGROUND GRADIENT LAYER */}
             <div className={`absolute inset-0 pointer-events-none transition-all duration-500 ${cardStyle.bgWash}`} />
