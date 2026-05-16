@@ -29,6 +29,8 @@ import CountryChart from '../components/charts/CountryChart';
 import CityChart from '../components/charts/CityChart';
 
 import InsightsTable from '../components/ui/InsightsTable';
+import AutoInsightSlider from '../components/ui/AutoInsightSlider';
+import QuickNavWidget from '../components/ui/QuickNavWidget';
 
 const initialFilterState = {
     end_year: '',
@@ -43,6 +45,7 @@ const initialFilterState = {
     intensity: '',
     likelihood: '',
     relevance: '',
+    swot: '',
 };
 
 const Dashboard = () => {
@@ -98,13 +101,48 @@ const Dashboard = () => {
     }, [loadDashboard]);
 
     // =====================================
-    // FILTERED DATA
+    // FILTERED DATA & SWOT ANALYSIS
     // =====================================
     useEffect(() => {
+        // Helper function to map data to a virtual SWOT matrix on the frontend
+        const matchesSwot = (item, swotFilter) => {
+            if (!swotFilter) return true;
+            
+            const intensity = item.intensity || 0;
+            const likelihood = item.likelihood || 0;
+            const relevance = item.relevance || 0;
+
+            switch (swotFilter.toUpperCase()) {
+                case 'STRENGTH':
+                    return intensity >= 12 && likelihood >= 3;
+                case 'WEAKNESS':
+                    return intensity < 6 && relevance < 3;
+                case 'OPPORTUNITY':
+                    return intensity < 8 && relevance >= 4;
+                case 'THREAT':
+                    return intensity >= 16 && likelihood >= 4;
+                default:
+                    return true;
+            }
+        };
+
         const loadFilteredData = async () => {
             try {
-                const dataResponse = await fetchDashboardData(selectedFilters);
-                setDashboardData(dataResponse.data);
+                // Separate swot from the rest of the filters
+                const { swot, ...backendFilters } = selectedFilters;
+
+                // Fetch data from backend using only supported backend filters
+                const dataResponse = await fetchDashboardData(backendFilters);
+                const rawData = dataResponse.data || [];
+
+                // Apply the custom virtual SWOT filter on the client side
+                const filteredBySwot = rawData.filter((item) => 
+                    matchesSwot(item, swot)
+                );
+
+                // Update state with the locally filtered data array
+                setDashboardData(filteredBySwot);
+
             } catch (err) {
                 console.error(err);
             }
@@ -173,7 +211,7 @@ const Dashboard = () => {
                         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
                             Live Intelligence Dashboard
                         </div>
-                        <h1 className="bg-gradient-to-r from-cyan-500 via-blue-500 to-violet-500 bg-clip-text text-4xl font-black tracking-tight text-transparent">
+                        <h1 className="bg-linear-to-r from-cyan-500 via-blue-500 to-violet-500 bg-clip-text text-4xl font-black tracking-tight text-transparent">
                             Analytics Overview
                         </h1>
                         <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground-muted">
@@ -203,13 +241,25 @@ const Dashboard = () => {
                     <StatsSection stats={stats} />
                 </div>
 
+                {/* ROW PANEL BLOCK CONTROLS */}
+<div className="grid grid-cols-1 lg:grid-cols-[35%_65%] gap-6 mb-8">
+
+    {/* Left Column: Automated Highlights Carousel */}
+    <AutoInsightSlider data={dashboardData} />
+
+    {/* Right Column: Your New Jump Anchor Navigator */}
+    <QuickNavWidget />
+
+</div>
+
                 {/* 3. FILTERS */}
-                <div className="mb-10 relative z-30">
+                <div id="filter-section" className="mb-10 relative z-30">
                     <FilterBar
                         filters={filters}
                         selectedFilters={selectedFilters}
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearFilters}
+                        dashboardData={dashboardData}
                     />
                 </div>
 
@@ -235,29 +285,27 @@ const Dashboard = () => {
                     <div className="flex flex-col gap-8">
                         
                         {/* 4. FULL WIDTH: BubbleChart */}
-                        <div className="w-full">
+                        <div id="bubble-chart" className="w-full">
                             <BubbleChart data={dashboardData} />
                         </div>
 
                         {/* 5. 2-COLUMN GRID CHARTS */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <YearTrendChart data={dashboardData} />
-                            <RegionChart data={dashboardData} />
-                            
-                            <IntensityBarChart data={dashboardData} />
-                            <TopicDonutChart data={dashboardData} />
-                            
-                            <CountryChart data={dashboardData} />
-                            <CityChart data={dashboardData} />
+                            <div id="year-trend"><YearTrendChart data={dashboardData} /></div>
+<div id="region-analytics"><RegionChart data={dashboardData} /></div>
+<div id="sector-intensity"><IntensityBarChart data={dashboardData} /></div>
+<div id="topic-donut"><TopicDonutChart data={dashboardData} /></div>
+<div id="country-map"><CountryChart data={dashboardData} /></div>
+<div id="city-analytics"><CityChart data={dashboardData} /></div>
                         </div>
 
                         {/* 6. FULL WIDTH: PestleChart */}
-                        <div className="w-full">
+                        <div id="pestle-analysis" className="w-full">
                             <PestleChart data={dashboardData} />
                         </div>
 
-                        {/* 7. FULL WIDTH: InsightsTable */}
-                        <div className="w-full">
+                        {/* FULL WIDTH: InsightsTable */}
+                        <div id="insights-table" className="w-full">
                             <InsightsTable data={dashboardData} />
                         </div>
 

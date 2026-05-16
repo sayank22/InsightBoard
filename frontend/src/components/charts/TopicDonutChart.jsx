@@ -1,14 +1,36 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import {
     Activity,
-    Layers3,
     Sparkles,
     TrendingUp,
+    Flame,         // Gas
+    Droplet,       // Oil
+    Factory,       // Production
+    Send,          // Export
+    Zap,           // Energy
+    HelpCircle     // Default Fallback
 } from 'lucide-react';
+
+// =====================================
+// DYNAMIC TOPIC ICON MAPPER
+// =====================================
+const getTopicIcon = (topic, size = 16, className = "") => {
+    const t = topic?.toLowerCase() || '';
+    
+    if (t.includes('gas')) return <Flame size={size} className={className} />;
+    if (t.includes('oil')) return <Droplet size={size} className={className} />;
+    if (t.includes('production')) return <Factory size={size} className={className} />;
+    if (t.includes('export')) return <Send size={size} className={className} />;
+    if (t.includes('energy')) return <Zap size={size} className={className} />;
+    if (t.includes('growth')) return <TrendingUp size={size} className={className} />;
+    
+    return <HelpCircle size={size} className={className} />;
+};
 
 const TopicDonutChart = ({ data }) => {
     const svgRef = useRef();
+    const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, data: null });
 
     // =====================================
     // MEMOIZED DATA
@@ -39,20 +61,21 @@ const TopicDonutChart = ({ data }) => {
         return chartData.reduce((sum, item) => sum + item.count, 0);
     }, [chartData]);
 
+    const dominantTopic = chartData?.[0]?.topic || '-';
+
     // =====================================
-    // CHART
+    // CHART RENDERING (D3)
     // =====================================
     useEffect(() => {
         if (!chartData.length) return;
 
         d3.select(svgRef.current).selectAll('*').remove();
-        d3.selectAll('.topic-tooltip').remove();
 
         // =====================================
         // DIMENSIONS
         // =====================================
         const width = 460;
-        const height = 460;
+        const height = 320;
         const radius = Math.min(width, height) / 2 - 25;
 
         // =====================================
@@ -101,10 +124,9 @@ const TopicDonutChart = ({ data }) => {
         // =====================================
         // CENTER (Theme Aware)
         // =====================================
-        // Inner circle matches the surface background
         svg.append('circle')
             .attr('r', radius * 0.48)
-            .attr('fill', 'var(--surface)')
+            .attr('fill', 'var(--surface-strong)')
             .attr('stroke', 'var(--border)')
             .attr('stroke-width', 1);
 
@@ -127,25 +149,6 @@ const TopicDonutChart = ({ data }) => {
             .text('Total Topics');
 
         // =====================================
-        // TOOLTIP (Theme Aware)
-        // =====================================
-        const tooltip = d3
-            .select('body')
-            .append('div')
-            .attr('class', 'topic-tooltip')
-            .style('position', 'absolute')
-            .style('opacity', 0)
-            .style('pointer-events', 'none')
-            .style('background', 'var(--surface-strong)')
-            .style('border', '1px solid var(--border)')
-            .style('border-radius', '14px')
-            .style('padding', '12px 14px')
-            .style('color', 'var(--foreground)')
-            .style('font-size', '12px')
-            .style('box-shadow', '0 10px 30px rgba(0,0,0,0.15)')
-            .style('z-index', '50');
-
-        // =====================================
         // SLICES
         // =====================================
         const slices = svg
@@ -155,7 +158,7 @@ const TopicDonutChart = ({ data }) => {
             .append('path')
             .attr('class', 'slice')
             .attr('fill', (d) => colorScale(d.data.topic))
-            .attr('stroke', 'var(--surface)') // Matches background exactly
+            .attr('stroke', 'var(--surface)') 
             .attr('stroke-width', 3)
             .style('cursor', 'pointer')
             .attr('d', arc);
@@ -171,17 +174,16 @@ const TopicDonutChart = ({ data }) => {
             .attr('opacity', 1);
 
         // =====================================
-        // HOVER
+        // HOVER INTERACTIONS (React Tooltip)
         // =====================================
         slices
             .on('mouseenter', function (event, d) {
-                d3.select(this)
-                    .transition()
-                    .duration(180)
-                    .attr('d', hoverArc);
+                // Animate D3 Slice
+                d3.select(this).transition().duration(180).attr('d', hoverArc);
 
                 const percentage = ((d.data.count / totalRecords) * 100).toFixed(1);
 
+                // Update D3 Center Text dynamically
                 centerValue.text(`${percentage}%`);
                 centerLabel.text(
                     d.data.topic.length > 16
@@ -189,48 +191,61 @@ const TopicDonutChart = ({ data }) => {
                         : d.data.topic
                 );
 
-                tooltip
-                    .style('opacity', 1)
-                    .html(`
-                        <div style="font-weight:700; margin-bottom:8px; font-size:13px; text-transform:capitalize; border-bottom:1px solid var(--border); padding-bottom:6px;">
-                            ${d.data.topic}
-                        </div>
-                        <div style="display:flex; justify-content:space-between; gap:20px; color:var(--foreground-muted);">
-                            <span>Records</span>
-                            <strong style="color:var(--foreground);">${d.data.count}</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; gap:20px; color:var(--foreground-muted); margin-top:4px;">
-                            <span>Share</span>
-                            <strong style="color:var(--foreground);">${percentage}%</strong>
-                        </div>
-                    `);
+                // Trigger React Tooltip
+                setTooltip({
+                    show: true,
+                    x: event.clientX,
+                    y: event.clientY,
+                    data: { ...d.data, percentage }
+                });
             })
             .on('mousemove', function (event) {
-                tooltip
-                    .style('left', `${event.pageX + 14}px`)
-                    .style('top', `${event.pageY - 28}px`);
+                setTooltip(prev => ({ ...prev, x: event.clientX, y: event.clientY }));
             })
             .on('mouseleave', function () {
-                d3.select(this)
-                    .transition()
-                    .duration(180)
-                    .attr('d', arc);
+                // Restore D3 Slice
+                d3.select(this).transition().duration(180).attr('d', arc);
 
+                // Restore D3 Center Text
                 centerValue.text(totalRecords);
                 centerLabel.text('Total Topics');
 
-                tooltip.style('opacity', 0);
+                // Hide Tooltip
+                setTooltip(prev => ({ ...prev, show: false }));
             });
-
-        return () => {
-            d3.selectAll('.topic-tooltip').remove();
-        };
 
     }, [chartData, totalRecords]);
 
     return (
-        <div className="relative overflow-hidden rounded-3xl border app-border bg-surface p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border app-border bg-[var(--surface)] p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
             
+            {/* REACT PORTAL TOOLTIP */}
+            {tooltip.show && tooltip.data && (
+                <div 
+                    className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full pb-4"
+                    style={{ left: tooltip.x, top: tooltip.y }}
+                >
+                    <div className="bg-[var(--surface-strong)] border app-border rounded-2xl p-4 shadow-2xl flex flex-col gap-3 min-w-[200px]">
+                        <div className="flex items-center gap-3 border-b app-border pb-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
+                                {getTopicIcon(tooltip.data.topic, 20, "text-violet-500")}
+                            </div>
+                            <div className="font-bold text-sm app-text capitalize truncate max-w-[140px]">
+                                {tooltip.data.topic}
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs text-[var(--foreground-muted)] uppercase tracking-wider font-semibold">Records</span>
+                            <span className="font-bold text-foreground text-base">{tooltip.data.count}</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs text-[var(--foreground-muted)] uppercase tracking-wider font-semibold">Share</span>
+                            <span className="font-bold text-violet-500 text-sm">{tooltip.data.percentage}%</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -248,41 +263,41 @@ const TopicDonutChart = ({ data }) => {
                     </p>
                 </div>
 
-                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-500">
+                <button className="flex items-center gap-2 rounded-2xl border app-border bg-[var(--surface-strong)] px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-500">
                     <TrendingUp size={16} />
                     View Trends
                 </button>
             </div>
 
-            {/* COMPACT STATS BOXES */}
+            {/* COMPACT STATS BOXES WITH ICON */}
             <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-4 py-2.5 transition-all hover:bg-[var(--surface-strong)]/60">
                     <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Total Topics</span>
                     <span className="text-lg font-bold app-text">{chartData.length}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-4 py-2.5 transition-all hover:bg-[var(--surface-strong)]/60">
                     <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Avg Records</span>
                     <span className="text-lg font-bold text-cyan-500">
                         {chartData.length > 0 ? (totalRecords / chartData.length).toFixed(1) : 0}
                     </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-4 py-2.5 transition-all hover:bg-[var(--surface-strong)]/60">
                     <div className="flex items-center gap-2">
-                        <Activity size={14} className="text-violet-500" />
                         <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Dominant</span>
                     </div>
-                    <span className="text-lg font-bold text-violet-500">
-                        {chartData?.[0]?.topic ? (
-                            chartData[0].topic.length > 10 ? `${chartData[0].topic.slice(0, 10)}...` : chartData[0].topic
-                        ) : '-'}
-                    </span>
+                    <div className="flex items-center gap-2 text-violet-500 font-bold">
+                        {getTopicIcon(dominantTopic, 16, "text-violet-500")}
+                        <span className="text-lg capitalize truncate max-w-[110px]">
+                            {dominantTopic !== '-' ? dominantTopic : '-'}
+                        </span>
+                    </div>
                 </div>
             </div>
 
             {/* CHART */}
-            <div className="rounded-3xl border app-border bg-surface-strong/20 p-4">
+            <div className="rounded-3xl border app-border bg-[var(--surface-strong)]/20 p-4">
                 <div className="w-full">
                     {/* Max width set to prevent the donut from getting massive on ultrawide screens */}
                     <svg ref={svgRef} className="mx-auto block w-full max-w-[460px] h-auto" />
