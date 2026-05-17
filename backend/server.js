@@ -1,26 +1,31 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const connectDB = require('./config/db'); // Import the config
+const connectDB = require('./config/db');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:5173',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 app.use(express.json());
 
-// Connect to Database
 connectDB();
 
-// Import Routes
 const apiRoutes = require('./routes/apiRoutes');
 
-// Base test route
 app.get('/', (req, res) => {
   res.send('Dashboard API is running');
 });
 
-// Use Routes
 app.use('/api', apiRoutes);
 
 const PORT = process.env.PORT || 5000;

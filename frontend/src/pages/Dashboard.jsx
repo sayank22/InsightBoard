@@ -285,19 +285,78 @@ const Dashboard = () => {
                     <div className="flex flex-col gap-8">
                         
                         {/* 4. FULL WIDTH: BubbleChart */}
-                        <div id="bubble-chart" className="w-full">
-                            <BubbleChart data={dashboardData} />
-                        </div>
+                        <div id="country-map" className="w-full"><CountryChart data={dashboardData} /></div>
+                        
 
-                        {/* 5. 2-COLUMN GRID CHARTS */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div id="year-trend"><YearTrendChart data={dashboardData} /></div>
-<div id="region-analytics"><RegionChart data={dashboardData} /></div>
-<div id="sector-intensity"><IntensityBarChart data={dashboardData} /></div>
-<div id="topic-donut"><TopicDonutChart data={dashboardData} /></div>
-<div id="country-map"><CountryChart data={dashboardData} /></div>
-<div id="city-analytics"><CityChart data={dashboardData} /></div>
-                        </div>
+                        {/* =========================
+    CHART GRID LAYOUT
+========================= */}
+
+<div className="space-y-8">
+
+    {/* =========================
+        ROW 1
+        Year + Region
+    ========================= */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <div id="year-trend">
+            <YearTrendChart data={dashboardData} />
+        </div>
+
+        <div id="region-analytics">
+            <RegionChart data={dashboardData} />
+        </div>
+
+    </div>
+
+
+    {/* =========================
+        ROW 2
+        City 25% + Bubble 75%
+    ========================= */}
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        <div
+            id="city-analytics"
+            className="lg:col-span-1"
+        >
+            <CityChart data={dashboardData} />
+        </div>
+
+        <div
+            id="bubble-chart"
+            className="lg:col-span-3"
+        >
+            <BubbleChart data={dashboardData} />
+        </div>
+
+    </div>
+
+
+    {/* =========================
+        ROW 3
+        Intensity 60% + Topic 40%
+    ========================= */}
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+        <div
+            id="sector-intensity"
+            className="lg:col-span-3"
+        >
+            <IntensityBarChart data={dashboardData} />
+        </div>
+
+        <div
+            id="topic-donut"
+            className="lg:col-span-2"
+        >
+            <TopicDonutChart data={dashboardData} />
+        </div>
+
+    </div>
+
+</div>
 
                         {/* 6. FULL WIDTH: PestleChart */}
                         <div id="pestle-analysis" className="w-full">

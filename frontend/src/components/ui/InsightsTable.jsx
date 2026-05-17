@@ -9,14 +9,109 @@ import {
     SearchX,
     Download,
     Search,
-    Coins,
     GanttChartSquare,
     ShieldAlert,
-    Leaf,
-    Cpu,
-    Users,
-    Scale
+    Scale,
+    Factory,       // Industries & Production
+    Coins,         // Economic
+    Landmark,      // Political
+    Leaf,          // Environmental
+    Users,         // Social
+    Cpu,           // Technological
+    Coffee,        // Lifestyles
+    Flame,         // Gas
+    Droplet,       // Oil      
+    Send,          // Export
+    Zap,           // Energy
+    HelpCircle,    // Default Fallback
+    ShoppingCart,  // For Consumption
+    Store,         // For Market
+    Banknote,      // For GDP
+    Swords,        // For War
+    TrendingUp,     // For Growth & Demand
+    Briefcase,
+    MoreVertical,
+    Eye,
+    Trash2
 } from 'lucide-react';
+
+const getCountryCode = (country) => {
+    if (!country) return null;
+    const mapping = {
+        'united states of america': 'us', 'united states': 'us', 'india': 'in',
+        'russia': 'ru', 'china': 'cn', 'iran': 'ir', 'saudi arabia': 'sa',
+        'iraq': 'iq', 'libya': 'ly', 'germany': 'de', 'france': 'fr',
+        'japan': 'jp', 'canada': 'ca', 'brazil': 'br', 'australia': 'au'
+    };
+    return mapping[country.toLowerCase().trim()] || null;
+};
+
+// =====================================
+// DYNAMIC TOPIC ICON MAPPER
+// =====================================
+const getTopicIcon = (topic) => {
+    if (!topic) return <HelpCircle size={16} className="text-[var(--foreground-muted)] opacity-50" />;
+    
+    const t = topic.toLowerCase();
+    
+    // Category-Based Icons
+    if (t.includes('industries') || t.includes('industry')) return <Factory size={16} className="text-gray-400" />;
+    if (t.includes('economic') || t.includes('economy')) return <Coins size={16} className="text-amber-500" />;
+    if (t.includes('political') || t.includes('politics')) return <Landmark size={16} className="text-rose-500" />;
+    if (t.includes('environmental') || t.includes('environment')) return <Leaf size={16} className="text-emerald-500" />;
+    if (t.includes('social') || t.includes('society')) return <Users size={16} className="text-violet-500" />;
+    if (t.includes('technological') || t.includes('technology')) return <Cpu size={16} className="text-cyan-500" />;
+    if (t.includes('organization') || t.includes('corporate')) return <Briefcase size={16} className="text-blue-500" />;
+    if (t.includes('lifestyle') || t.includes('culture')) return <Coffee size={16} className="text-orange-400" />;
+    
+    // Topic-Based Icons
+    if (t.includes('gas')) return <Flame size={16} className="text-orange-500" />;
+    if (t.includes('oil')) return <Droplet size={16} className="text-sky-400" />;
+    if (t.includes('production')) return <Factory size={16} className="text-gray-400" />;
+    if (t.includes('export')) return <Send size={16} className="text-blue-600" />;
+    if (t.includes('energy')) return <Zap size={16} className="text-amber-400" />;
+    if (t.includes('growth') || t.includes('demand')) return <TrendingUp size={16} className="text-emerald-500" />;
+    if (t.includes('consumption')) return <ShoppingCart size={16} className="text-pink-500" />;
+    if (t.includes('market')) return <Store size={16} className="text-indigo-800" />;
+    if (t.includes('gdp')) return <Banknote size={16} className="text-emerald-600" />;
+    if (t.includes('war') || t.includes('conflict')) return <Swords size={16} className="text-red-600" />;
+    
+    return <HelpCircle size={16} className="text-[var(--foreground-muted)] opacity-50" />;
+};
+
+// =====================================
+// CONTEXTUAL MAP HELPERS
+// =====================================
+const getCategoryIcon = (pestle) => {
+    if (!pestle) return <GanttChartSquare size={16} className="opacity-40" />;
+    switch (pestle.toLowerCase()) {
+        case 'industries': return <Factory size={16} className="text-violet-600" />;
+        case 'economic': return <Coins size={16} className="text-amber-500" />;
+        case 'political': return <ShieldAlert size={16} className="text-rose-500" />;
+        case 'environmental': return <Leaf size={16} className="text-emerald-500" />;
+        case 'technological': return <Cpu size={16} className="text-cyan-500" />;
+        case 'social': return <Users size={16} className="text-indigo-500" />;
+        case 'legal': return <Scale size={16} className="text-blue-500" />;
+        case 'organization': return <Briefcase size={16} className="text-slate-500" />;
+        case 'lifestyle': return <Coffee size={16} className="text-orange-500" />;
+        default: return <GanttChartSquare size={16} className="opacity-40" />;
+    }
+};
+
+const getIntensityBadge = (intensity) => {
+    if (!intensity) return <span className="text-[var(--foreground-muted)]">-</span>;
+    if (intensity > 20) return <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 text-xs font-bold border border-rose-500/20">{intensity}</span>;
+    if (intensity > 10) return <span className="inline-flex items-center px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">{intensity}</span>;
+    return <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">{intensity}</span>;
+};
+
+const getRelevanceBadge = (relevance) => {
+    if (!relevance) return <span className="text-[var(--foreground-muted)]">-</span>;
+    if (relevance > 4) return <span className="text-cyan-500 font-bold">{relevance}</span>;
+    if (relevance > 2) return <span className="text-violet-500 font-bold">{relevance}</span>;
+    return <span className="text-[var(--foreground-muted)] font-medium">{relevance}</span>;
+};
+
 
 const InsightsTable = ({ data = [] }) => {
     // =====================================
@@ -25,18 +120,32 @@ const InsightsTable = ({ data = [] }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRows, setSelectedRows] = useState(new Set());
+    const [openDropdown, setOpenDropdown] = useState(null); // Tracks open action menu
     const rowsPerPage = 10;
 
     // Reset page and selections when data source changes
     useEffect(() => {
-        setCurrentPage(1);
-        setSelectedRows(new Set());
+        const id = setTimeout(() => {
+            setCurrentPage(1);
+            setSelectedRows(new Set());
+        }, 0);
+        return () => clearTimeout(id);
     }, [data]);
 
     // Reset page when search term filters the array
     useEffect(() => {
-        setCurrentPage(1);
+        const id = setTimeout(() => {
+            setCurrentPage(1);
+        }, 0);
+        return () => clearTimeout(id);
     }, [searchTerm]);
+
+    // Close dropdowns if user clicks anywhere outside the menu
+    useEffect(() => {
+        const closeMenu = () => setOpenDropdown(null);
+        document.addEventListener('click', closeMenu);
+        return () => document.removeEventListener('click', closeMenu);
+    }, []);
 
     // =====================================
     // REAL-TIME CLIENT FILTERING
@@ -127,54 +236,6 @@ const InsightsTable = ({ data = [] }) => {
     };
 
     // =====================================
-    // CONTEXTUAL MAP HELPERS
-    // =====================================
-    const getCategoryIcon = (pestle) => {
-        if (!pestle) return <GanttChartSquare size={16} className="opacity-40" />;
-        switch (pestle.toLowerCase()) {
-            case 'economic': return <Coins size={16} className="text-amber-500" />;
-            case 'political': return <ShieldAlert size={16} className="text-rose-500" />;
-            case 'environmental': return <Leaf size={16} className="text-emerald-500" />;
-            case 'technological': return <Cpu size={16} className="text-cyan-500" />;
-            case 'social': return <Users size={16} className="text-violet-500" />;
-            case 'legal': return <Scale size={16} className="text-blue-500" />;
-            default: return <GanttChartSquare size={16} className="opacity-40" />;
-        }
-    };
-
-    const getCountryFlag = (country) => {
-        if (!country) return '';
-        const norm = country.toLowerCase().trim();
-        if (norm.includes('united states')) return '🇺🇸';
-        if (norm === 'india') return '🇮🇳';
-        if (norm.includes('united kingdom')) return '🇬🇧';
-        if (norm === 'china') return '🇨🇳';
-        if (norm === 'russia') return '🇷🇺';
-        if (norm === 'germany') return '🇩🇪';
-        if (norm === 'france') return '🇫🇷';
-        if (norm === 'japan') return '🇯🇵';
-        if (norm === 'saudi arabia') return '🇸🇦';
-        if (norm === 'canada') return '🇨🇦';
-        if (norm === 'brazil') return '🇧🇷';
-        if (norm === 'australia') return '🇦🇺';
-        return '🌐';
-    };
-
-    const getIntensityBadge = (intensity) => {
-        if (!intensity) return <span className="text-[var(--foreground-muted)]">-</span>;
-        if (intensity > 20) return <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 text-xs font-bold border border-rose-500/20">{intensity}</span>;
-        if (intensity > 10) return <span className="inline-flex items-center px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">{intensity}</span>;
-        return <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">{intensity}</span>;
-    };
-
-    const getRelevanceBadge = (relevance) => {
-        if (!relevance) return <span className="text-[var(--foreground-muted)]">-</span>;
-        if (relevance > 4) return <span className="text-cyan-500 font-bold">{relevance}</span>;
-        if (relevance > 2) return <span className="text-violet-500 font-bold">{relevance}</span>;
-        return <span className="text-[var(--foreground-muted)] font-medium">{relevance}</span>;
-    };
-
-    // =====================================
     // EXTENDED MATRIX PAGINATION BUILDER
     // =====================================
     const paginationRange = useMemo(() => {
@@ -257,11 +318,10 @@ const InsightsTable = ({ data = [] }) => {
                 </div>
             ) : (
                 <>
-                    <div className="w-full overflow-x-auto rounded-2xl border app-border">
+                    <div className="w-full overflow-x-visible rounded-2xl border app-border relative z-0">
                         <table className="w-full border-collapse text-left text-sm">
                             <thead className="bg-[var(--surface-strong)]/50 select-none">
                                 <tr className="border-b app-border">
-                                    {/* Action Toggle Selection Columns Element Header */}
                                     <th className="w-12 px-6 py-4">
                                         <input
                                             type="checkbox"
@@ -276,22 +336,23 @@ const InsightsTable = ({ data = [] }) => {
                                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[var(--foreground-muted)] text-xs">Country</th>
                                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[var(--foreground-muted)] text-xs">Intensity</th>
                                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[var(--foreground-muted)] text-xs">Relevance</th>
+                                    <th className="w-10 px-6 py-4 text-center"></th> 
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentTableData.map((item, index) => {
                                     const globalIndex = index + (currentPage - 1) * rowsPerPage;
                                     const isRowSelected = selectedRows.has(globalIndex);
+                                    const countryCode = getCountryCode(item.country);
 
                                     return (
                                         <tr 
                                             key={index} 
                                             onClick={() => handleSelectRow(globalIndex)}
-                                            className={`border-b app-border transition-colors cursor-pointer last:border-0 ${
+                                            className={`border-b app-border transition-colors cursor-pointer last:border-0 relative ${
                                                 isRowSelected ? 'bg-cyan-500/5 dark:bg-cyan-500/10 hover:bg-cyan-500/10' : 'hover:bg-[var(--hover)]'
                                             }`}
                                         >
-                                            {/* Action Toggle Element Body Checkbox Container */}
                                             <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
@@ -301,15 +362,19 @@ const InsightsTable = ({ data = [] }) => {
                                                 />
                                             </td>
 
+                                            {/* TOPIC COLUMN (WITH ICONS) */}
                                             <td className="px-6 py-4 font-bold app-text capitalize whitespace-nowrap">
-                                                {item.topic || <span className="text-[var(--foreground-muted)] italic text-xs">Unspecified</span>}
+                                                <div className="flex items-center gap-2.5">
+                                                    {getTopicIcon(item.topic)}
+                                                    {item.topic || <span className="text-[var(--foreground-muted)] italic text-xs font-normal">Unspecified</span>}
+                                                </div>
                                             </td>
 
                                             <td className="px-6 py-4 app-text whitespace-nowrap">
                                                 <div className="flex items-center gap-2.5">
                                                     {getCategoryIcon(item.pestle)}
                                                     <span className="capitalize font-medium text-sm">
-                                                        {item.pestle || <span className="text-[var(--foreground-muted)] italic text-xs">General</span>}
+                                                        {item.pestle || <span className="text-[var(--foreground-muted)] italic text-xs font-normal">General</span>}
                                                     </span>
                                                 </div>
                                             </td>
@@ -318,12 +383,15 @@ const InsightsTable = ({ data = [] }) => {
                                                 {item.region || '-'}
                                             </td>
 
+                                            {/* COUNTRY COLUMN (WITH FLAG CSS) */}
                                             <td className="px-6 py-4 app-text whitespace-nowrap font-medium">
                                                 {item.country ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-base leading-none select-none">
-                                                            {getCountryFlag(item.country)}
-                                                        </span>
+                                                    <div className="flex items-center gap-2.5">
+                                                        {countryCode ? (
+                                                            <span className={`fi fi-${countryCode} rounded-sm text-sm shadow-sm`}></span>
+                                                        ) : (
+                                                            <span className="text-sm">🌐</span>
+                                                        )}
                                                         <span className="capitalize">{item.country}</span>
                                                     </div>
                                                 ) : (
@@ -337,6 +405,46 @@ const InsightsTable = ({ data = [] }) => {
 
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {getRelevanceBadge(item.relevance)}
+                                            </td>
+
+                                            {/* ACTION DROPDOWN COLUMN */}
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setOpenDropdown(openDropdown === globalIndex ? null : globalIndex);
+                                                        }}
+                                                        className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:bg-[var(--surface-strong)] hover:text-cyan-500 transition-colors focus:outline-none"
+                                                    >
+                                                        <MoreVertical size={16} />
+                                                    </button>
+
+                                                    {/* DROPDOWN MENU */}
+                                                    {openDropdown === globalIndex && (
+                                                        <div className="absolute right-8 top-8 z-[100] w-36 rounded-xl border app-border bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur-xl">
+                                                            <button 
+                                                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-cyan-500/10 hover:text-cyan-500"
+                                                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
+                                                            >
+                                                                <Eye size={14} /> View
+                                                            </button>
+                                                            <button 
+                                                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-cyan-500/10 hover:text-cyan-500"
+                                                                onClick={(e) => { e.stopPropagation(); exportToCSV(); setOpenDropdown(null); }}
+                                                            >
+                                                                <Download size={14} /> Download
+                                                            </button>
+                                                            <div className="my-1 h-px w-full bg-[var(--border)] opacity-50" />
+                                                            <button 
+                                                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-500/10"
+                                                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
+                                                            >
+                                                                <Trash2 size={14} /> Delete
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -353,7 +461,6 @@ const InsightsTable = ({ data = [] }) => {
 
                         {/* ENTERPRISE SCALE PAGINATION BUTTON MATRIX LIST ARRAY ELEMENTS */}
                         <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                            {/* FIRST PAGE BOUNCER NAVIGATION CONTROL BUTTON ELEMENT */}
                             <button
                                 onClick={() => setCurrentPage(1)}
                                 disabled={currentPage === 1}
@@ -363,7 +470,6 @@ const InsightsTable = ({ data = [] }) => {
                                 <PaperIconWrapper Icon={ChevronsLeft} />
                             </button>
 
-                            {/* PREVIOUS STEP PAGE NAVIGATION BACKWARD BUTTON */}
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                                 disabled={currentPage === 1}
@@ -373,7 +479,6 @@ const InsightsTable = ({ data = [] }) => {
                                 <PaperIconWrapper Icon={ChevronLeft} />
                             </button>
 
-                            {/* NUMERIC MATRIX ENGINE BLOCK LOOP HOOK PANEL */}
                             {paginationRange.map((pageNumber, pageIndex) => {
                                 if (pageNumber === '...') {
                                     return (
@@ -400,7 +505,6 @@ const InsightsTable = ({ data = [] }) => {
                                 );
                             })}
 
-                            {/* NEXT STEP PAGE NAVIGATION FORWARD ACTION ROW ELEMENT BUTTON */}
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                                 disabled={currentPage === totalPages}
@@ -410,7 +514,6 @@ const InsightsTable = ({ data = [] }) => {
                                 <PaperIconWrapper Icon={ChevronRight} />
                             </button>
 
-                            {/* LAST PAGE ROW END STEP BOUNDARY TERMINAL CONTROL TRIGGER PANEL */}
                             <button
                                 onClick={() => setCurrentPage(totalPages)}
                                 disabled={currentPage === totalPages}

@@ -91,7 +91,7 @@ const AutoInsightSlider = ({ data = [] }) => {
 
         const [topCountry, countryCount] = getTopFrequency('country');
         const [topSector, sectorCount] = getTopFrequency('sector');
-        const [topPestle, pestleCount] = getTopFrequency('pestle');
+        const [topPestle] = getTopFrequency('pestle');
 
         // Total records for percentage math
         const total = data.length;
@@ -277,7 +277,7 @@ const AutoInsightSlider = ({ data = [] }) => {
             </div>
 
             {/* Animation Engine Keyframe */}
-            <style jsx>{`
+            <style>{`
                 @keyframes fill-progress {
                     0% { transform: scaleX(0); }
                     100% { transform: scaleX(1); }

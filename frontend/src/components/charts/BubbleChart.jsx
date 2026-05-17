@@ -35,11 +35,12 @@ const BubbleChart = ({ data }) => {
         const chartData = validData.slice(0, 120);
 
         // =====================================
-        // DIMENSIONS
+        // DIMENSIONS (Maximized for space)
         // =====================================
         const width = 1000;
-        const height = 280;
-        const margin = { top: 40, right: 40, bottom: 70, left: 70 };
+        const height = 300; 
+        // Reduced margins so the chart stretches further to the edges
+        const margin = { top: 20, right: 20, bottom: 50, left: 50 };
 
         // =====================================
         // SVG
@@ -68,7 +69,7 @@ const BubbleChart = ({ data }) => {
         const radiusScale = d3
             .scaleSqrt()
             .domain([0, d3.max(chartData, (d) => d.likelihood)])
-            .range([5, 26]);
+            .range([4, 24]); // Slightly scaled down max bubble size
 
         // =====================================
         // COLORS
@@ -84,7 +85,6 @@ const BubbleChart = ({ data }) => {
         // =====================================
         // GRID
         // =====================================
-        // X Gridlines
         svg.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(xScale).ticks(6).tickSize(-height + margin.top + margin.bottom).tickFormat(''))
@@ -93,7 +93,6 @@ const BubbleChart = ({ data }) => {
             .attr('stroke-dasharray', '4,4')
             .attr('opacity', 0.5);
 
-        // Y Gridlines
         svg.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(d3.axisLeft(yScale).ticks(6).tickSize(-width + margin.left + margin.right).tickFormat(''))
@@ -105,46 +104,46 @@ const BubbleChart = ({ data }) => {
         svg.selectAll('.domain').remove();
 
         // =====================================
-        // AXES
+        // AXES (Smaller text)
         // =====================================
         svg.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(xScale).ticks(6))
             .selectAll('text')
             .style('fill', 'var(--foreground-muted)')
-            .style('font-size', '12px');
+            .style('font-size', '11px'); // 12px -> 11px
 
         svg.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(d3.axisLeft(yScale).ticks(6))
             .selectAll('text')
             .style('fill', 'var(--foreground-muted)')
-            .style('font-size', '12px');
+            .style('font-size', '11px'); // 12px -> 11px
 
         // =====================================
-        // AXIS LABELS
+        // AXIS LABELS (Smaller text)
         // =====================================
         svg.append('text')
             .attr('x', width / 2)
-            .attr('y', height - 18)
+            .attr('y', height - 10)
             .attr('text-anchor', 'middle')
             .style('fill', 'var(--foreground)')
-            .style('font-size', '13px')
+            .style('font-size', '12px') // 13px -> 12px
             .style('font-weight', '600')
             .text('Relevance Score');
 
         svg.append('text')
             .attr('transform', 'rotate(-90)')
             .attr('x', -height / 2)
-            .attr('y', 22)
+            .attr('y', 16)
             .attr('text-anchor', 'middle')
             .style('fill', 'var(--foreground)')
-            .style('font-size', '13px')
+            .style('font-size', '12px') // 13px -> 12px
             .style('font-weight', '600')
             .text('Intensity Score');
 
         // =====================================
-        // TOOLTIP (Theme Aware)
+        // TOOLTIP
         // =====================================
         const tooltip = d3
             .select('body')
@@ -156,9 +155,9 @@ const BubbleChart = ({ data }) => {
             .style('background', 'var(--surface-strong)')
             .style('border', '1px solid var(--border)')
             .style('border-radius', '12px')
-            .style('padding', '12px 16px')
+            .style('padding', '10px 14px')
             .style('color', 'var(--foreground)')
-            .style('font-size', '13px')
+            .style('font-size', '12px') // 13px -> 12px
             .style('box-shadow', '0 10px 25px -5px rgba(0,0,0,0.1)')
             .style('z-index', '50');
 
@@ -180,7 +179,6 @@ const BubbleChart = ({ data }) => {
             .attr('stroke-width', 1.5)
             .style('cursor', 'crosshair');
 
-        // ENTRY ANIMATION
         bubbles
             .transition()
             .duration(700)
@@ -188,13 +186,9 @@ const BubbleChart = ({ data }) => {
             .ease(d3.easeBackOut.overshoot(1.5))
             .attr('r', (d) => radiusScale(d.likelihood));
 
-        // HOVER
         bubbles
             .on('mouseenter', function (event, d) {
-                // Dim others
                 d3.selectAll('.bubble').transition().duration(150).attr('fill-opacity', 0.15);
-
-                // Highlight hovered
                 d3.select(this)
                     .raise()
                     .transition().duration(150)
@@ -208,35 +202,26 @@ const BubbleChart = ({ data }) => {
                 tooltip
                     .style('opacity', 1)
                     .html(`
-                        <div style="font-weight:700; margin-bottom:8px; font-size:14px; text-transform:capitalize; border-bottom:1px solid var(--border); padding-bottom:6px; color:var(--foreground);">
+                        <div style="font-weight:700; margin-bottom:6px; font-size:13px; text-transform:capitalize; border-bottom:1px solid var(--border); padding-bottom:4px; color:var(--foreground);">
                             ${d.topic || 'Unknown'}
                         </div>
-                        <div style="display:grid; grid-template-columns:auto auto; gap:6px 16px; font-size:12px; color:var(--foreground-muted);">
-                            <span>Intensity</span>
-                            <strong style="color:${bubbleColor};">${d.intensity}</strong>
-
-                            <span>Relevance</span>
-                            <strong style="color:${bubbleColor};">${d.relevance}</strong>
-
-                            <span>Likelihood</span>
-                            <strong style="color:${bubbleColor};">${d.likelihood}</strong>
+                        <div style="display:grid; grid-template-columns:auto auto; gap:4px 14px; font-size:11px; color:var(--foreground-muted);">
+                            <span>Intensity</span><strong style="color:${bubbleColor};">${d.intensity}</strong>
+                            <span>Relevance</span><strong style="color:${bubbleColor};">${d.relevance}</strong>
+                            <span>Likelihood</span><strong style="color:${bubbleColor};">${d.likelihood}</strong>
                         </div>
                     `);
             })
             .on('mousemove', function (event) {
-                tooltip
-                    .style('left', `${event.pageX + 16}px`)
-                    .style('top', `${event.pageY - 40}px`);
+                tooltip.style('left', `${event.pageX + 16}px`).style('top', `${event.pageY - 40}px`);
             })
             .on('mouseleave', function () {
-                // Restore all
                 d3.selectAll('.bubble')
                     .transition().duration(200)
                     .attr('stroke', 'var(--surface)')
                     .attr('stroke-width', 1.5)
                     .attr('fill-opacity', 0.75)
                     .attr('r', (d) => radiusScale(d.likelihood));
-
                 tooltip.style('opacity', 0);
             });
 
@@ -255,59 +240,55 @@ const BubbleChart = ({ data }) => {
     const topicCount = new Set(validData.map((item) => item.topic || 'Unknown')).size;
 
     return (
-        <div className="relative overflow-hidden rounded-3xl border app-border bg-surface p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border app-border bg-[var(--surface)] p-5 shadow-xl transition-all duration-300 hover:shadow-2xl">
             
-            {/* HEADER */}
-            <div className="mb-3 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            {/* HEADER - Stepped down fonts 1 level */}
+            <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-                        <Sparkles size={14} />
+                    <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                        <Sparkles size={12} />
                         Correlation Analytics
                     </div>
-                    <h2 className="text-xl font-bold app-text">
+                    <h2 className="text-lg font-bold app-text">
                         Bubble Intelligence Map
                     </h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 app-text-muted">
+                    <p className="mt-0.5 max-w-2xl text-[13px] leading-5 app-text-muted">
                         Relationship between relevance, intensity, and likelihood across different topics.
                     </p>
                 </div>
 
-                <button className="flex items-center gap-2 rounded-2xl border app-border bg-surface-strong px-5 py-3 text-sm font-medium app-text transition-all duration-300 hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-cyan-500">
-                    <Activity size={16} />
+                <button className="flex items-center gap-2 rounded-xl border app-border bg-[var(--surface-strong)] px-4 py-2 text-[13px] font-medium app-text transition-all duration-300 hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-cyan-500">
+                    <Activity size={15} />
                     Analyze Trends
                 </button>
             </div>
 
-            {/* STATS */}
-<div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-    {/* Data Points Box */}
-    <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-        <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Data Points</span>
-        <span className="text-lg font-bold app-text">{validData.length}</span>
-    </div>
+            {/* STATS - Stepped down fonts 1 level */}
+            <div className="mb-4 grid grid-cols-1 gap-2 md:grid-cols-3">
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-3 py-2 transition-all hover:bg-[var(--surface-strong)]/60">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider app-text-muted">Data Points</span>
+                    <span className="text-base font-bold app-text">{validData.length}</span>
+                </div>
 
-    {/* Avg Intensity Box */}
-    <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-        <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Avg Intensity</span>
-        <span className="text-lg font-bold text-cyan-500">{avgIntensity}</span>
-    </div>
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-3 py-2 transition-all hover:bg-[var(--surface-strong)]/60">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider app-text-muted">Avg Intensity</span>
+                    <span className="text-base font-bold text-cyan-500">{avgIntensity}</span>
+                </div>
 
-    {/* Categories Box */}
-    <div className="flex items-center justify-between rounded-xl border app-border bg-surface-strong/40 px-4 py-2.5 transition-all hover:bg-surface-strong/60">
-        <div className="flex items-center gap-2">
-            <Layers3 size={14} className="text-violet-500" />
-            <span className="text-xs font-semibold uppercase tracking-wider app-text-muted">Categories</span>
-        </div>
-        <span className="text-lg font-bold text-violet-500">{topicCount}</span>
-    </div>
-</div>
-
-            {/* CHART */}
-            <div className="rounded-3xl border app-border bg-surface-strong/20 p-4">
-                <div className="overflow-x-auto w-full flex justify-center">
-                    <svg ref={svgRef} className="min-w-200" />
+                <div className="flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-3 py-2 transition-all hover:bg-[var(--surface-strong)]/60">
+                    <div className="flex items-center gap-2">
+                        <Layers3 size={14} className="text-violet-500" />
+                        <span className="text-[11px] font-semibold uppercase tracking-wider app-text-muted">Categories</span>
+                    </div>
+                    <span className="text-base font-bold text-violet-500">{topicCount}</span>
                 </div>
             </div>
+
+            {/* CHART - Removed outer box, uses full width seamlessly */}
+            <div className="relative w-full mt-2">
+                <svg ref={svgRef} className="block w-full h-auto" />
+            </div>
+            
         </div>
     );
 };

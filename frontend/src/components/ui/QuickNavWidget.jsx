@@ -91,7 +91,7 @@ const QuickNavWidget = () => {
             </div>
 
             {/* Scrollbar styling injected locally just for this widget if it gets too tall */}
-            <style jsx>{`
+            <style>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 4px;
                 }

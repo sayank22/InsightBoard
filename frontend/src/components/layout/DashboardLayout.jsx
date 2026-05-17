@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import ScrollToTop from '../ui/ScrollToTop';
 import BuyNowButton from '../ui/BuyNowButton';
 
@@ -23,7 +24,7 @@ const DashboardLayout = ({ children }) => {
                     {children}
                 </main>
             </div>
-
+            <Footer />
             {/* Global Floating Elements */}
             <ScrollToTop />
             <BuyNowButton />
