@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { Globe2, Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles, TrendingUp } from 'lucide-react';
 
 const RegionChart = ({ data }) => {
     const svgRef = useRef();
@@ -47,7 +47,30 @@ const RegionChart = ({ data }) => {
         svg.append('g').attr('transform', `translate(${margin.left},0)`).call(d3.axisLeft(yScale).ticks(5).tickSize(-width + margin.left + margin.right).tickFormat('')).selectAll('line').attr('stroke', 'var(--border)').attr('stroke-dasharray', '4,4').attr('opacity', 0.5);
         svg.selectAll('.domain').remove();
 
-        svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(d3.axisBottom(xScale).tickSize(0)).selectAll('text').style('fill', 'var(--foreground-muted)').style('font-size', '11px').style('font-weight', '500').attr('transform', 'translate(0, 10)');
+        svg.append('g')
+            .attr('transform', `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(xScale).tickSize(0))
+            .selectAll('text')
+            .style('fill', 'var(--foreground-muted)')
+            .style('font-size', '11px')
+            .style('font-weight', '500')
+            .attr('transform', 'translate(0, 10)')
+            .text(null) // 1. Clear the default single-line text
+            .each(function (d) {
+                // 2. Grab the current text element
+                const textElement = d3.select(this);
+                // 3. Split the region name by spaces (e.g., "Northern America" -> ["Northern", "America"])
+                const words = d.split(' ');
+                
+                // 4. Loop through the words and append them as <tspan> elements
+                words.forEach((word, i) => {
+                    textElement.append('tspan')
+                        .text(word)
+                        .attr('x', 0) // Keep it centered
+                        // Only add a line break (dy) if it's the 2nd word or later
+                        .attr('dy', i === 0 ? '0' : '1.2em'); 
+                });
+            });
         svg.append('g').attr('transform', `translate(${margin.left - 10},0)`).call(d3.axisLeft(yScale).ticks(5).tickSize(0)).selectAll('text').style('fill', 'var(--foreground-muted)').style('font-size', '11px').style('font-weight', '500');
 
         // Colors
@@ -145,10 +168,10 @@ const RegionChart = ({ data }) => {
 
                 <div className="group cursor-pointer flex items-center justify-between rounded-xl border app-border bg-[var(--surface-strong)]/40 px-3 py-2 transition-all hover:bg-[var(--surface-strong)]/60 min-w-0">
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <Globe2 size={14} className="text-emerald-500 transition-colors duration-300 group-hover:brightness-125" />
-                        <span className="text-[11px] font-semibold uppercase tracking-wider app-text-muted transition-colors duration-300 group-hover:text-emerald-500/80">Leading Region</span>
+                        {/* <Globe2 size={14} className="text-emerald-500 transition-colors duration-300 group-hover:brightness-125" /> */}
+                        <span className="text-[9px] uppercase tracking-wider app-text-muted transition-colors duration-300 group-hover:text-emerald-500/80">Leading</span>
                     </div>
-                    <span className="text-base font-bold text-emerald-500 truncate ml-2 transition-colors duration-300 group-hover:brightness-125">
+                    <span className="text-[9px] text-emerald-500 truncate transition-colors duration-300 group-hover:brightness-125">
                         {leadingRegion}
                     </span>
                 </div>

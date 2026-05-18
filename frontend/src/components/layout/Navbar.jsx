@@ -269,6 +269,116 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
 
                 {/* RIGHT SECTION */}
                 <div className="flex items-center gap-2">
+                    {/* MOBILE SEARCH */}
+<div className="relative lg:hidden">
+
+    <button
+        onClick={() => toggleDropdown('search')}
+        className={iconBtnClass}
+    >
+        <Search size={18} />
+    </button>
+
+    {activeDropdown === 'search' && (
+        <div
+            className={`
+                ${dropdownClass}
+
+                fixed
+                left-1/2
+                top-[90px]
+                z-[999]
+
+                w-[92vw]
+                max-w-[420px]
+
+                -translate-x-1/2
+            `}
+        >
+
+            <div className="p-4 border-b border-border">
+                <div className="relative">
+
+                    <Search
+                        size={16}
+                        className="
+                            absolute
+                            left-3
+                            top-1/2
+                            -translate-y-1/2
+                            text-foreground-muted
+                        "
+                    />
+
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={(e) =>
+                            setSearchTerm(e.target.value)
+                        }
+                        className="
+                            w-full
+                            rounded-xl
+                            border border-border
+                            bg-[var(--surface)]
+                            py-3
+                            pl-10
+                            pr-4
+                            text-sm
+                            outline-none
+                        "
+                    />
+                </div>
+            </div>
+
+            <div className="max-h-[300px] overflow-y-auto">
+                {!searchTerm.trim() ? (
+
+                    <div className="p-4 text-sm app-text-muted">
+                        Start typing to search...
+                    </div>
+
+                ) : searchResults.length > 0 ? (
+
+                    <div className="p-2">
+                        {searchResults.map((item, idx) => (
+                            <Link
+                                key={idx}
+                                to={`/search?q=${item.topic}`}
+                                onClick={() =>
+                                    setActiveDropdown(null)
+                                }
+                                className="
+                                    block
+                                    rounded-xl
+                                    px-4
+                                    py-3
+                                    transition-all
+                                    hover:bg-[var(--surface)]
+                                "
+                            >
+                                <p className="text-sm font-medium app-text">
+                                    {item.topic}
+                                </p>
+
+                                <p className="text-xs app-text-muted">
+                                    {item.region || 'Global'}
+                                </p>
+                            </Link>
+                        ))}
+                    </div>
+
+                ) : (
+
+                    <div className="p-4 text-sm app-text-muted">
+                        No results found.
+                    </div>
+                )}
+            </div>
+        </div>
+    )}
+</div>
 
                     {/* LANGUAGE */}
                     <div className="relative">
@@ -276,7 +386,9 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
                             <Globe size={18} />
                         </button>
                         {activeDropdown === 'language' && (
-                            <div className={`${dropdownClass} right-0 w-52`}>
+                            <div className={`${dropdownClass} max-md:left-1/2
+max-md:-translate-x-1/2
+md:right-0 w-52`}>
                                 <div className="border-b border-border p-4 text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
                                     Select Language
                                 </div>
@@ -299,7 +411,9 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
                             <ThemeIcon size={18} />
                         </button>
                         {activeDropdown === 'theme' && (
-                            <div className={`${dropdownClass} right-0 w-52`}>
+                            <div className={`${dropdownClass} max-md:left-1/2
+max-md:-translate-x-1/2
+md:right-0 w-52`}>
                                 {THEMES.map(({ label, value, icon: Icon }) => (
                                     <button
                                         key={value}
@@ -323,7 +437,9 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
     </button>
             {/* Dropdown Panel */}
             {activeDropdown === 'shortcuts' && (
-                <div className={`${dropdownClass} right-0 w-[350px] p-0 overflow-hidden`}>
+                <div className={`${dropdownClass} max-md:left-1/2
+max-md:-translate-x-1/2
+md:right-0 w-[350px] p-0 overflow-hidden`}>
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-background">
                         <h3 className="text-base font-medium text-foreground">Shortcut</h3>
@@ -372,7 +488,33 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
 
             {/* Dropdown Panel */}
             {activeDropdown === 'notifications' && (
-                <div className="absolute right-0 mt-2 w-[380px] bg-background rounded-xl shadow-[0_5px_25px_-5px_rgba(0,0,0,0.1)] border border-border flex flex-col overflow-hidden z-50">
+                <div
+    className="
+        fixed
+        top-[78px]
+
+        left-1/2
+        -translate-x-1/2
+
+        md:absolute
+        md:left-auto
+        md:translate-x-0
+        md:right-0
+        md:top-auto
+
+        mt-2
+        w-[92vw]
+        max-w-[380px]
+
+        bg-background
+        rounded-xl
+        shadow-[0_5px_25px_-5px_rgba(0,0,0,0.1)]
+        border border-border
+        flex flex-col
+        overflow-hidden
+        z-50
+    "
+>
                     
                     {/* 1. FIXED HEADER */}
                     <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0 bg-background">

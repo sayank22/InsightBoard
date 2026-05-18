@@ -80,9 +80,9 @@ An enterprise-grade, theme-aware analytics platform built with the MERN stack, N
 
 ### Backend & Database
 <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
-![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
-![Mongoose](https://img.shields.io/badge/mongoose-%23880000.svg?style=for-the-badge&logo=mongoose&logoColor=white)
+<img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB" />
+<img src="https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white" />
+<img src="https://img.shields.io/badge/mongoose-%23880000.svg?style=for-the-badge&logo=mongoose&logoColor=white"
 
 ### Deployment
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
@@ -149,4 +149,5 @@ npm run dev
 
 See it live: [https://insight-board-sayankundu.vercel.app](https://insight-board-sayankundu.vercel.app)
 
-![Desktop Demo 1](client/src/assets/Screenshot.png)
+![Desktop Demo 1](frontend/src/assets/Screenshot1.png)
+![Desktop Demo 2](frontend/src/assets/Screenshot.png)
