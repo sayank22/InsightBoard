@@ -12,7 +12,7 @@ const Footer = () => {
                     <Heart size={14} className="animate-pulse text-rose-500 fill-rose-500" />
                     <span>by</span>
                     <a 
-                        href="https://yourportfolio.com" // 🔴 Replace with your actual portfolio link
+                        href="https://sayan-kundu-portfolio.netlify.app" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="font-bold text-cyan-500 transition-colors duration-300 hover:text-cyan-400 hover:underline"
@@ -35,7 +35,7 @@ const Footer = () => {
                     
                     {/* Documentation - External Github Link */}
                     <a 
-                        href="https://github.com/yourusername/your-repo" // 🔴 Replace with your GitHub link
+                        href="https://github.com/sayank22/InsightBoard" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="group flex items-center gap-2 text-[var(--foreground-muted)] transition-colors duration-300 hover:text-cyan-500"

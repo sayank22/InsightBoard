@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
     Loader2,
@@ -76,29 +76,43 @@ const Dashboard = () => {
     // =====================================
     // INITIAL LOAD
     // =====================================
-    const loadDashboard = useCallback(async () => {
+    useEffect(() => {
+
+    const loadDashboard = async () => {
+
         try {
+
             setLoading(true);
             setError(null);
 
-            const [statsResponse, filtersResponse] = await Promise.all([
+            const [
+                statsResponse,
+                filtersResponse,
+            ] = await Promise.all([
                 fetchDashboardStats(),
                 fetchFilterOptions(),
             ]);
 
             setStats(statsResponse.stats);
             setFilters(filtersResponse.filters);
+
         } catch (err) {
+
             console.error(err);
-            setError('Failed to establish connection with the analytics server.');
+
+            setError(
+                'Failed to establish connection with the analytics server.'
+            );
+
         } finally {
+
             setLoading(false);
         }
-    }, []);
+    };
 
-    useEffect(() => {
-        loadDashboard();
-    }, [loadDashboard]);
+    loadDashboard();
+
+}, []);
 
     // =====================================
     // FILTERED DATA & SWOT ANALYSIS
@@ -186,7 +200,7 @@ const Dashboard = () => {
                         <h3 className="text-2xl font-bold text-foreground">Connection Error</h3>
                         <p className="mt-3 text-sm leading-6 text-foreground-muted">{error}</p>
                         <button
-                            onClick={loadDashboard}
+                            onClick={() => window.location.reload()}
                             className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-cyan-600 shadow-lg shadow-cyan-500/20"
                         >
                             <RefreshCw className="h-4 w-4" />

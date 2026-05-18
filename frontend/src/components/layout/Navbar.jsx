@@ -4,7 +4,6 @@ import {
     ChevronDown,
     Command,
     Globe,
-    Layers3,
     LogOut,
     Menu,
     Monitor,
@@ -165,9 +164,14 @@ const Navbar = ({ setSidebarOpen, dashboardData = [] }) => {
         <Menu size={22} className="transition-transform duration-300 group-hover:scale-110" />
     </button>
 
+   {/* logo and title - hidden on mobile to save space */}
     <div className="hidden sm:flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/20 text-white">
-            <Layers3 size={24} />
+        <div className="flex h-12 w-12 items-center justify-center">
+            <img
+    src="/logo.png"
+    alt="InsightBoard Logo"
+    className="h-8 w-8 object-contain"
+/>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">InsightBoard</h1>
     </div>
